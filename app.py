@@ -44,14 +44,18 @@ import logging
 TOKEN = '1705182368:AAE4G_9-HB50SwVvTEJvLHEkWNLJ83kEaU4'
 
 
-# webhook settings
-WEBHOOK_HOST = 'https://aio-bot-telegram-photo-phrase.herokuapp.com'
-WEBHOOK_PATH = '/app.py'
+WEBHOOK_HOST = 'https://aio-bot-telegram-photo-phrase.herokuapp.com'  # name your app
+WEBHOOK_PATH = '/' + TOKEN
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
-# webserver settings
-WEBAPP_HOST = 'localhost'  # or ip
-WEBAPP_PORT = 3001
+WEBAPP_HOST = '0.0.0.0'
+WEBAPP_PORT = os.environ.get('PORT')
+
+logging.basicConfig(level=logging.INFO)
+
+bot = Bot(token=TOKEN)
+storage = MemoryStorage()
+dp = Dispatcher(bot, storage=storage)
 
 
 # WEBHOOK_HOST = 'https://aio-bot-telegram-photo-phrase.herokuapp.com'
@@ -69,10 +73,10 @@ WEBAPP_PORT = 3001
 
 
 
-
-bot = Bot(token=TOKEN)
-
-dp = Dispatcher(bot=bot)
+#
+# bot = Bot(token=TOKEN)
+#
+# dp = Dispatcher(bot=bot)
 
 
 @dp.message_handler(commands=['start'])
@@ -107,35 +111,17 @@ async def main_2(message : types.Message):
 
 async def on_startup(dp):
     await bot.set_webhook(WEBHOOK_URL)
-    # insert code here to run it after start
+    logging.info(dp)
 
 
 async def on_shutdown(dp):
-    logging.warning('Shutting down..')
-
-    # insert code here to run it before shutdown
-
-    # Remove webhook (not acceptable in some cases)
-    await bot.delete_webhook()
-
-    # Close DB connection (if used)
-    await dp.storage.close()
-    await dp.storage.wait_closed()
-
-    logging.warning('Bye!')
+    logging.info(dp)
 
 
 if __name__ == '__main__':
-    start_webhook(
-        dispatcher=dp,
-        webhook_path=WEBHOOK_PATH,
-        on_startup=on_startup,
-        on_shutdown=on_shutdown,
-        skip_updates=True,
-        host=WEBAPP_HOST,
-        port=WEBAPP_PORT,
-    )
-
+    start_webhook(dispatcher=dp, webhook_path=WEBHOOK_PATH,
+                  on_startup=on_startup, on_shutdown=on_shutdown,
+                  host=WEBAPP_HOST, port=WEBAPP_PORT)
 
 
 
