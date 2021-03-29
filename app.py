@@ -51,7 +51,7 @@ WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
 
 # webserver settings
 WEBAPP_HOST = '0.0.0.0'
-WEBAPP_PORT = int(os.getenv('PORT'))
+WEBAPP_PORT = int(os.getenv('PORT', 5000))
 
 
 
@@ -109,27 +109,30 @@ async def main_2(message : types.Message):
 
 
 
-async def on_startup(dp):
-    logging.warning(
-        'Starting connection. ')
-    await bot.set_webhook(WEBHOOK_URL,drop_pending_updates=True)
+async def on_startup():
+    await bot.delete_webhook()
+    await bot.set_webhook(WEBHOOK_URL)
 
 
-async def on_shutdown(dp):
-    logging.warning('Bye! Shutting down webhook connection')
+# Run before shutdown
+async def on_shutdown():
+    logging.warning("Shutting down..")
+    await bot.delete_webhook()
+    await dp.storage.close()
+    await dp.storage.wait_closed()
+    logging.warning("Bot down")
 
 
-def main():
-    logging.basicConfig(level=logging.INFO)
-    start_webhook(
+if __name__ == "__main__":
+    executor.start_webhook(
         dispatcher=dp,
         webhook_path=WEBHOOK_PATH,
-        skip_updates=True,
         on_startup=on_startup,
+        on_shutdown=on_shutdown,
+        skip_updates=True,
         host=WEBAPP_HOST,
         port=WEBAPP_PORT,
     )
-
 
 
 
