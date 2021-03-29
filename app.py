@@ -15,12 +15,19 @@ logger = logging.getLogger(__name__)
 #aiofristbot
 
 
-TOKEN = os.getenv('TOKEN')  # Press "Reveal Config Vars" in settings tab on Heroku and set TOKEN variable
-PROJECT_NAME = os.getenv('PROJECT_NAME')  # Set it as you've set TOKEN env var
+# TOKEN = os.getenv('TOKEN')  # Press "Reveal Config Vars" in settings tab on Heroku and set TOKEN variable
+# PROJECT_NAME = os.getenv('PROJECT_NAME')  # Set it as you've set TOKEN env var
 
-WEBHOOK_HOST = f'https://{PROJECT_NAME}.herokuapp.com/'  # Enter here your link from Heroku project settings
-WEBHOOK_URL_PATH = '/webhook/' + TOKEN
-WEBHOOK_URL = urljoin(WEBHOOK_HOST, WEBHOOK_URL_PATH)
+# WEBHOOK_HOST = f'https://{PROJECT_NAME}.herokuapp.com/'  # Enter here your link from Heroku project settings
+# WEBHOOK_URL_PATH = '/webhook/' + TOKEN
+# WEBHOOK_URL = urljoin(WEBHOOK_HOST, WEBHOOK_URL_PATH)
+
+
+TOKEN = '1705182368:AAE4G_9-HB50SwVvTEJvLHEkWNLJ83kEaU4'
+WEBHOOK_HOST = 'https://aio-bot-telegram-photo-phrase.herokuapp.com/'
+WEBHOOK_PATH = '/webhook/' + TOKEN
+WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
+
 
 bot = Bot(token=TOKEN)
 
@@ -58,20 +65,54 @@ async def main_2(message : types.Message):
 
 
 
-async def on_startup(app):
-    """Simple hook for aiohttp application which manages webhook"""
-    await bot.delete_webhook()
+async def on_startup(dp):
     await bot.set_webhook(WEBHOOK_URL)
+    # insert code here to run it after start
+
+
+async def on_shutdown(dp):
+    logging.warning('Shutting down..')
+
+    # insert code here to run it before shutdown
+
+    # Remove webhook (not acceptable in some cases)
+    await bot.delete_webhook()
+
+    # Close DB connection (if used)
+    await dp.storage.close()
+    await dp.storage.wait_closed()
+
+    logging.warning('Bye!')
 
 
 if __name__ == '__main__':
-    # Create aiohttp.web.Application with configured route for webhook path
-    app = get_new_configured_app(dispatcher=dp, path=WEBHOOK_URL_PATH)
-    app.on_startup.append(on_startup)
-    web.run_app(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))  # Heroku stores port you have to listen in your app
+    start_webhook(
+        dispatcher=dp,
+        webhook_path=WEBHOOK_PATH,
+        on_startup=on_startup,
+        on_shutdown=on_shutdown,
+        skip_updates=True,
+        host=WEBAPP_HOST,
+        port=WEBAPP_PORT,
+    )
 
 
 
+
+# async def on_startup(app):
+#     """Simple hook for aiohttp application which manages webhook"""
+#     await bot.delete_webhook()
+#     await bot.set_webhook(WEBHOOK_URL)
+#
+#
+# if __name__ == '__main__':
+#     # Create aiohttp.web.Application with configured route for webhook path
+#     app = get_new_configured_app(dispatcher=dp, path=WEBHOOK_URL_PATH)
+#     app.on_startup.append(on_startup)
+#     web.run_app(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))  # Heroku stores port you have to listen in your app
+#
+#
+#
 
 
 # def main():
