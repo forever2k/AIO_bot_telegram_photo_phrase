@@ -46,7 +46,7 @@ TOKEN = '1705182368:AAE4G_9-HB50SwVvTEJvLHEkWNLJ83kEaU4'
 
 # webhook settings
 WEBHOOK_HOST = 'https://aio-bot-telegram-photo-phrase.herokuapp.com'
-WEBHOOK_PATH = '/' + TOKEN
+WEBHOOK_PATH = '/app.py'
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
 # webserver settings
