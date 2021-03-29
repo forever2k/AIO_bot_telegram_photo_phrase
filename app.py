@@ -4,6 +4,7 @@ from aiogram.utils import executor
 from aiogram.dispatcher.webhook import get_new_configured_app
 from aiogram.utils.executor import start_webhook
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.contrib.middlewares.logging import LoggingMiddleware
 
 from urllib.parse import urljoin
 from aiohttp import web
@@ -44,18 +45,15 @@ import logging
 TOKEN = '1705182368:AAE4G_9-HB50SwVvTEJvLHEkWNLJ83kEaU4'
 
 
-WEBHOOK_HOST = 'https://aio-bot-telegram-photo-phrase.herokuapp.com'  # name your app
-WEBHOOK_PATH = '/' + TOKEN
-WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
+WEBHOOK_HOST = 'https://aio-bot-telegram-photo-phrase.herokuapp.com'
+WEBHOOK_PATH = f'/webhook/{TOKEN}'
+WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
 
+# webserver settings
 WEBAPP_HOST = '0.0.0.0'
-WEBAPP_PORT = os.environ.get('PORT')
+WEBAPP_PORT = int(os.getenv('PORT'))
 
-logging.basicConfig(level=logging.INFO)
 
-bot = Bot(token=TOKEN)
-storage = MemoryStorage()
-dp = Dispatcher(bot, storage=storage)
 
 
 # WEBHOOK_HOST = 'https://aio-bot-telegram-photo-phrase.herokuapp.com'
@@ -73,10 +71,11 @@ dp = Dispatcher(bot, storage=storage)
 
 
 
-#
-# bot = Bot(token=TOKEN)
-#
-# dp = Dispatcher(bot=bot)
+
+bot = Bot(token=TOKEN)
+
+dp = Dispatcher(bot=bot)
+dp.middleware.setup(LoggingMiddleware())
 
 
 @dp.message_handler(commands=['start'])
@@ -109,19 +108,54 @@ async def main_2(message : types.Message):
 
 
 
+
 async def on_startup(dp):
-    await bot.set_webhook(WEBHOOK_URL)
-    logging.info(dp)
+    logging.warning(
+        'Starting connection. ')
+    await bot.set_webhook(WEBHOOK_URL,drop_pending_updates=True)
 
 
 async def on_shutdown(dp):
-    logging.info(dp)
+    logging.warning('Bye! Shutting down webhook connection')
 
 
-if __name__ == '__main__':
-    start_webhook(dispatcher=dp, webhook_path=WEBHOOK_PATH,
-                  on_startup=on_startup, on_shutdown=on_shutdown,
-                  host=WEBAPP_HOST, port=WEBAPP_PORT)
+def main():
+    logging.basicConfig(level=logging.INFO)
+    start_webhook(
+        dispatcher=dp,
+        webhook_path=WEBHOOK_PATH,
+        skip_updates=True,
+        on_startup=on_startup,
+        host=WEBAPP_HOST,
+        port=WEBAPP_PORT,
+    )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# async def on_startup(dp):
+#     await bot.set_webhook(WEBHOOK_URL)
+#     logging.info(dp)
+#
+#
+# async def on_shutdown(dp):
+#     logging.info(dp)
+#
+#
+# if __name__ == '__main__':
+#     start_webhook(dispatcher=dp, webhook_path=WEBHOOK_PATH,
+#                   on_startup=on_startup, on_shutdown=on_shutdown,
+#                   host=WEBAPP_HOST, port=WEBAPP_PORT)
 
 
 
