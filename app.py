@@ -70,11 +70,11 @@ WEBAPP_PORT = int(os.getenv('PORT'))
 # dp = Dispatcher(bot, storage=storage)
 
 
-
+logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=TOKEN)
 
-dp = Dispatcher(bot=bot)
+dp = Dispatcher(bot)
 dp.middleware.setup(LoggingMiddleware())
 
 
@@ -108,31 +108,62 @@ async def main_2(message : types.Message):
 
 
 
-
 async def on_startup(dp):
-    logging.warning(
-        'Starting connection. ')
-    await bot.set_webhook(WEBHOOK_URL,drop_pending_updates=True)
+    await bot.set_webhook(WEBHOOK_URL)
+    # insert code here to run it after start
 
 
 async def on_shutdown(dp):
-    logging.warning('Bye! Shutting down webhook connection')
+    logging.warning('Shutting down..')
+
+    # insert code here to run it before shutdown
+
+    # Remove webhook (not acceptable in some cases)
+    await bot.delete_webhook()
+
+    # Close DB connection (if used)
+    await dp.storage.close()
+    await dp.storage.wait_closed()
+
+    logging.warning('Bye!')
 
 
-def main():
-    logging.basicConfig(level=logging.INFO)
+if __name__ == '__main__':
     start_webhook(
         dispatcher=dp,
         webhook_path=WEBHOOK_PATH,
-        skip_updates=True,
         on_startup=on_startup,
+        on_shutdown=on_shutdown,
+        skip_updates=True,
         host=WEBAPP_HOST,
         port=WEBAPP_PORT,
     )
 
 
-if __name__ == "__main__":
-    main()
+# async def on_startup(dp):
+#     logging.warning(
+#         'Starting connection. ')
+#     await bot.set_webhook(WEBHOOK_URL,drop_pending_updates=True)
+#
+#
+# async def on_shutdown(dp):
+#     logging.warning('Bye! Shutting down webhook connection')
+#
+#
+# def main():
+#     logging.basicConfig(level=logging.INFO)
+#     start_webhook(
+#         dispatcher=dp,
+#         webhook_path=WEBHOOK_PATH,
+#         skip_updates=True,
+#         on_startup=on_startup,
+#         host=WEBAPP_HOST,
+#         port=WEBAPP_PORT,
+#     )
+#
+#
+# if __name__ == "__main__":
+#     main()
 
 
 
