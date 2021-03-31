@@ -45,9 +45,10 @@ import logging
 TOKEN = '1705182368:AAE4G_9-HB50SwVvTEJvLHEkWNLJ83kEaU4'
 
 
-WEBHOOK_HOST = 'https://aio-bot-telegram-photo-phrase.herokuapp.com/'
+WEBHOOK_HOST = 'https://aio-bot-telegram-photo-phrase.herokuapp.com'
 WEBHOOK_PATH = f'/{TOKEN}'
-WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
+WEBHOOK_PORT = 443
+WEBHOOK_URL = f'{WEBHOOK_HOST}:{WEBHOOK_PORT}{WEBHOOK_PATH}'
 
 # webserver settings
 WEBAPP_HOST = '0.0.0.0'
