@@ -1,57 +1,64 @@
-import os
+#import os
+#import logging
+
+#rom aiogram import Bot, Dispatcher, types, executor
+
+
+
+
+
+
 import logging
+import os
+from aiogram import Bot, types, md
+from aiogram.dispatcher import Dispatcher
+from aiogram.utils.executor import start_webhook
 
-from aiogram import Bot, Dispatcher, types, executor
-
-PROJECT_NAME = 'aio-bot-telegram-photo-phrase'
 TOKEN = '1705182368:AAE4G_9-HB50SwVvTEJvLHEkWNLJ83kEaU4'
 
-WEBHOOK_HOST = f"https://{PROJECT_NAME}.herokuapp.com"
-WEBHOOK_PATH = "/webhook/" + TOKEN
+
+WEBHOOK_HOST = 'https://aio-bot-telegram-photo-phrase.herokuapp.com'  # name your app
+WEBHOOK_PATH = '/webhook/'
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
-WEBAPP_HOST = "0.0.0.0"
-WEBAPP_PORT = int(os.getenv("PORT"))
-
-bot = Bot(TOKEN)
-dp = Dispatcher(bot)
+WEBAPP_HOST = '0.0.0.0'
+WEBAPP_PORT = os.environ.get('PORT')
 
 logging.basicConfig(level=logging.INFO)
 
-
-# Example handler
-@dp.message_handler(commands="start")
-async def start_handler(message: types.Message):
-    await bot.send_message(message.chat.id, text="hi")
+bot = Bot(token=TOKEN)
+dp = Dispatcher(bot)
 
 
-# Run after startup
-async def on_startup():
-    await bot.delete_webhook()
+@dp.message_handler(commands='start')
+async def welcome(message: types.Message):
+    await bot.send_message(
+        message.chat.id,
+        f'Приветствую! Это демонтрационный бот\n'
+        f'Подробная информация на '
+        f'{md.hlink("github", "https://github.com/deploy-your-bot-everywhere/heroku")}',
+        parse_mode=types.ParseMode.HTML,
+        disable_web_page_preview=True)
+
+
+@dp.message_handler()
+async def echo(message: types.Message):
+    await bot.send_message(message.chat.id, message.text)
+
+
+async def on_startup(dp):
     await bot.set_webhook(WEBHOOK_URL)
 
 
-# Run before shutdown
-async def on_shutdown():
-    logging.warning("Shutting down..")
-    await bot.delete_webhook()
-    await dp.storage.close()
-    await dp.storage.wait_closed()
-    logging.warning("Bot down")
+async def on_shutdown(dp):
+    # insert code here to run it before shutdown
+    pass
 
 
-if __name__ == "__main__":
-    executor.start_webhook(
-            dispatcher=dp,
-            webhook_path=WEBHOOK_PATH,
-            on_startup=on_startup,
-            on_shutdown=on_shutdown,
-            skip_updates=True,
-            host=WEBAPP_HOST,
-            port=WEBAPP_PORT,
-        )
-
-        
+if __name__ == '__main__':
+    start_webhook(dispatcher=dp, webhook_path=WEBHOOK_PATH,
+                  on_startup=on_startup, on_shutdown=on_shutdown,
+                  host=WEBAPP_HOST, port=WEBAPP_PORT)
 
 
 
@@ -60,10 +67,15 @@ if __name__ == "__main__":
 
 
 
-#from aiogram import Bot, types
-# from aiogram.dispatcher import Dispatcher
-# from aiogram.utils import executor
-# from aiogram.dispatcher.webhook import get_new_configured_app
+
+
+
+
+
+
+
+
+# Example get_new_configured_app
 # from aiogram.utils.executor import start_webhook
 # from aiogram.contrib.fsm_storage.memory import MemoryStorage
 # from aiogram.contrib.middlewares.logging import LoggingMiddleware
