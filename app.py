@@ -10,7 +10,7 @@ WEBHOOK_HOST = f"https://{PROJECT_NAME}.herokuapp.com"
 WEBHOOK_PATH = "/webhook/" + TOKEN
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
-WEBAPP_HOST = "localhost"
+WEBAPP_HOST = "0.0.0.0"
 WEBAPP_PORT = 8443
 
 bot = Bot(TOKEN)
@@ -41,8 +41,7 @@ async def on_shutdown():
 
 
 if __name__ == "__main__":
-    if "HEROKU" in list(os.environ.keys()):
-        executor.start_webhook(
+    executor.start_webhook(
             dispatcher=dp,
             webhook_path=WEBHOOK_PATH,
             on_startup=on_startup,
@@ -51,8 +50,10 @@ if __name__ == "__main__":
             host=WEBAPP_HOST,
             port=WEBAPP_PORT,
         )
-    else:
-        executor.start_polling(dp)
+
+        
+
+
 
 
 
