@@ -11,7 +11,7 @@ WEBHOOK_PATH = "/webhook/" + TOKEN
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
 WEBAPP_HOST = "0.0.0.0"
-WEBAPP_PORT = 8443
+WEBAPP_PORT = int(os.getenv("PORT"))
 
 bot = Bot(TOKEN)
 dp = Dispatcher(bot)
