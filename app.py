@@ -33,7 +33,7 @@ dp = Dispatcher(bot)
 @dp.message_handler(commands='start')
 async def welcome(message: types.Message):
     await bot.send_message(
-        message.chat.id, "I understood it. I am fine)"
+        message.chat.id, "I understood it. I am fine")
 
 
 
